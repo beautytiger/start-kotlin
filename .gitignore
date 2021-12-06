@@ -1,2 +1,5 @@
 *.exe
 startKotlin/.idea
+startKotlin/.gradle
+kotlinNative/.idea
+kotlinNative/.gradle
