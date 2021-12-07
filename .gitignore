@@ -1,5 +1,7 @@
 *.exe
-startKotlin/.idea
-startKotlin/.gradle
+00_learnKotlin/.idea
+00_learnKotlin/.gradle
+00_learnKotlin/build
 kotlinNative/.idea
 kotlinNative/.gradle
+kotlinNative/build
