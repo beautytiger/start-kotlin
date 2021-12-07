@@ -5,3 +5,7 @@
 kotlinNative/.idea
 kotlinNative/.gradle
 kotlinNative/build
+*/.idea
+*/.gradle
+*/build
+*.bmp
