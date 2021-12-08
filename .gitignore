@@ -9,3 +9,4 @@ kotlinNative/build
 */.gradle
 */build
 *.bmp
+*.jar
