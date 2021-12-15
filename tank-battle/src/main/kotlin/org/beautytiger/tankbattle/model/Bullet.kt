@@ -11,8 +11,13 @@ import org.itheima.kotlin.game.core.Painter
 
 //create 函数返回两个值，对应x与y
 class Bullet(override var owner: View, override val currentDirection: Direction, create:(width:Int, height:Int)->Pair<Int, Int>
-) :AutoMovable, Destroyable, Attackable {
+) :AutoMovable, Destroyable, Attackable, Sufferable {
     override val speed: Int = 8
+    override var blood: Int = 1
+
+    override fun notifySUffer(attackable: Attackable): Array<View>? {
+        return arrayOf(Blast(x,y))
+    }
 
     override val width: Int
     override val height: Int

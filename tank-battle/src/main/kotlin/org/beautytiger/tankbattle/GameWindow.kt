@@ -7,6 +7,7 @@ import org.beautytiger.tankbattle.enums.Direction
 import org.beautytiger.tankbattle.model.*
 import org.itheima.kotlin.game.core.Painter
 import org.itheima.kotlin.game.core.Window
+import sun.invoke.empty.Empty
 import sun.security.krb5.internal.crypto.Des
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
@@ -28,6 +29,17 @@ class GameWindow:Window(
     //晚点创建
     private lateinit var tank:Tank
     private lateinit var camp:Camp
+
+    private var gameOver:Boolean = false
+
+    private var enemyTotalSize = 20
+    //地图显示最多敌人数量
+    private var enemyActiveSize = 6
+    //敌人出生点
+    private val enemyBornLocation = arrayListOf<Pair<Int, Int>>()
+    //出生地点下标
+    var enemyBornIndex:Int = 0
+
     override fun onCreate() {
         //地图设计
         //通过读文件创建地图，注意这里的绝对路径
@@ -43,7 +55,7 @@ class GameWindow:Window(
                     '铁' -> views.add(Steel(colNum*Config.block, lineNum*Config.block))
                     '草' -> views.add(Grass(colNum*Config.block, lineNum*Config.block))
                     '水' -> views.add(Water(colNum*Config.block, lineNum*Config.block))
-                    '敌' -> views.add(Enemy(colNum*Config.block, lineNum*Config.block))
+                    '敌' -> enemyBornLocation.add(Pair(colNum*Config.block, lineNum*Config.block))
                 }
                 colNum++
             }
@@ -75,6 +87,9 @@ class GameWindow:Window(
 
 //    var i:Int = 0
     override fun onKeyPressed(event: KeyEvent) {
+        if (gameOver) {
+            return
+        }
 //        println(event.code)
 //        println("${i}")
 //        i++
@@ -100,6 +115,23 @@ class GameWindow:Window(
     }
 
     override fun onRefresh() {
+
+        //检测销毁
+        views.filter { it is Destroyable }.forEach {
+            if ((it as Destroyable).isDestroyed()) {
+                views.remove(it)
+                if (it is Enemy) {
+                    enemyTotalSize--
+                }
+                val destroy = it.showDestroy()
+                destroy?.let {
+                    views.addAll(destroy)
+                }
+            }
+        }
+
+        if (gameOver) return
+
         //业务逻辑
 
         //判断运动的物体和阻塞的物体是否发生碰撞
@@ -128,17 +160,13 @@ class GameWindow:Window(
         views.filter { it is AutoMovable }.forEach {
             (it as AutoMovable).autoMove()
         }
-        //检测销毁
-        views.filter { it is Destroyable }.forEach {
-            if ((it as Destroyable).isDestroyed()) {
-                views.remove(it)
-            }
-        }
+
         //检测攻击能力和被攻击能力是否碰撞
         views.filter { it is Attackable }.forEach { attack ->
             attack as Attackable
             //攻击方的源不可以是发射方
-            views.filter { (it is Sufferable) and (attack.owner != it) }.forEach { suffer ->
+            //攻击方如果也是受攻击方时，是不可以打自己的
+            views.filter { (it is Sufferable) and (attack.owner != it) and (attack != it) }.forEach { suffer ->
                 suffer as Sufferable
                 //判断是否产生碰撞
                 if (attack.isCollision(suffer)) {
@@ -162,6 +190,20 @@ class GameWindow:Window(
             shot?.let {
                 views.add(shot)
             }
+        }
+
+        //检测游戏是否结束
+        if((views.filter { it is Camp }.isEmpty()) or (enemyTotalSize<=0)) {
+            gameOver = true
+        }
+
+        //检测地方出生
+        //判断当前页面地方数量，小于激活数量
+        if ((enemyTotalSize>0) and (views.filter { it is Enemy }.size < enemyActiveSize)) {
+            val index = enemyBornIndex % enemyBornLocation.size
+            val pair = enemyBornLocation[index]
+            views.add(Enemy(pair.first, pair.second))
+            enemyBornIndex++
         }
     }
 }

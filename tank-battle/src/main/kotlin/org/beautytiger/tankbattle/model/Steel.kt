@@ -1,10 +1,18 @@
 package org.beautytiger.tankbattle.model
 
 import org.beautytiger.tankbattle.Config
+import org.beautytiger.tankbattle.business.Attackable
 import org.beautytiger.tankbattle.business.Blockable
+import org.beautytiger.tankbattle.business.Sufferable
 import org.itheima.kotlin.game.core.Painter
 
-class Steel(override val x: Int, override val y: Int):Blockable {
+class Steel(override val x: Int, override val y: Int):Blockable,Sufferable {
+    override var blood: Int = 1
+
+    override fun notifySUffer(attackable: Attackable): Array<View>? {
+        return null
+    }
+
     //    //位置
 //    var x:Int = 200
 //    var y:Int = 200
